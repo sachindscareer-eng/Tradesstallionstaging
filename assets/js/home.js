@@ -313,6 +313,7 @@
 
 
 	/* ---------- Hero motion scene ---------- */
+	(function () {
 	var scene = $('[data-scene]');
 	if (scene) {
 		var logos = {};
@@ -384,7 +385,10 @@
 		} else if (revEl) { revEl.textContent = '£4,280'; if (acosEl) { acosEl.textContent = '18%'; } }
 	}
 
+	}());
+
 	/* ---------- Interactive client dashboard demo ---------- */
+	(function () {
 	var dash = $('[data-dash]');
 	if (dash) {
 		var dLogos = {};
@@ -532,6 +536,7 @@
 			new IntersectionObserver(function (es, ob) { if (es[0].isIntersecting) { go(); ob.disconnect(); } }, { threshold: 0.25 }).observe(dash);
 		} else { go(); }
 	}
+	}());
 
 	window.addEventListener('scroll', onScroll, { passive: true });
 	window.addEventListener('resize', onScroll);
