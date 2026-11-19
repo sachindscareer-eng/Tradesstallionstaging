@@ -728,6 +728,72 @@
 				if (curView === 'overview') { renderOverview(); } else { renderView(); }
 			});
 		});
+
+		/* ----- Auto demo: plays like a video, hands over control on interaction ----- */
+		var demo = { on: !reduce, timer: 0, sweep: 0, idle: 0, i: 0, visible: false };
+		var badge = mk('button', 'ts-dash__auto'); badge.type = 'button';
+		var bDot = mk('i', 'ts-dash__auto-ic'); var bTxt = mk('span', '', 'Playing demo'); var bBar = mk('b'); bBar.appendChild(mk('em'));
+		badge.setAttribute('aria-label', 'Pause demo');
+		badge.appendChild(bDot); badge.appendChild(bTxt); badge.appendChild(bBar);
+		var topBar = $('.ts-dash__top', dash); if (topBar) { topBar.appendChild(badge); }
+		var mpKeys = ['amazon', 'ebay', 'etsy', 'shopify'];
+		var STEPS = [];
+		mpKeys.forEach(function (k, mi) {
+			STEPS.push({ mp: k, view: 'overview', range: [30, 90, 7, 30][mi], ms: 6500, sweep: true });
+			STEPS.push({ view: ['listings', 'ads', 'health', 'reports'][mi], ms: 6000, extra: ['row', 'switch', null, 'report'][mi] });
+		});
+		var clickEl = function (el) { if (el) { el.click(); } };
+		var stopSweep = function () { if (demo.sweep) { clearInterval(demo.sweep); demo.sweep = 0; } if (plot) { plot.classList.remove('is-hover'); } if (tip) { tip.hidden = true; } };
+		var runSweep = function () {
+			if (!plot) { return; }
+			var t = 0; stopSweep();
+			demo.sweep = setInterval(function () {
+				var r = plot.getBoundingClientRect(); if (!r.width) { return; }
+				t += 0.012; var x = r.left + r.width * (0.04 + 0.92 * Math.min(1, t));
+				plot.dispatchEvent(new PointerEvent('pointermove', { clientX: x, clientY: r.top + r.height / 2, bubbles: true }));
+				if (t >= 1) { stopSweep(); }
+			}, 50);
+		};
+		var setBar = function (ms) {
+			var em = $('em', bBar); em.style.transition = 'none'; em.style.width = '0%';
+			void em.offsetWidth; em.style.transition = 'width ' + ms + 'ms linear'; em.style.width = '100%';
+		};
+		var play = function () {
+			clearTimeout(demo.timer);
+			if (!demo.on || !demo.visible) { return; }
+			var st = STEPS[demo.i % STEPS.length]; demo.i++;
+			if (st.mp) { clickEl($('[data-mp="' + st.mp + '"]', dash)); }
+			if (st.range) { clickEl($('[data-range="' + st.range + '"]', dash)); }
+			clickEl($('[data-view="' + st.view + '"]', dash));
+			if (st.sweep) { setTimeout(runSweep, 1300); }
+			if (st.extra === 'row') { setTimeout(function () { clickEl($('[data-view-panel="listings"] .ts-vrow__top', dash)); }, 1800); }
+			if (st.extra === 'switch') { setTimeout(function () { clickEl($$('[data-view-panel="ads"] .ts-vswitch', dash)[4]); }, 2200); }
+			if (st.extra === 'report') { setTimeout(function () { clickEl($$('[data-view-panel="reports"] .ts-vreport__top', dash)[1]); }, 2200); }
+			setBar(st.ms);
+			demo.timer = setTimeout(play, st.ms);
+		};
+		var setMode = function (on) {
+			demo.on = on;
+			badge.classList.toggle('is-paused', !on);
+			bTxt.textContent = on ? 'Playing demo' : 'Play demo';
+			badge.setAttribute('aria-label', on ? 'Pause demo' : 'Play demo');
+			if (on) { play(); } else { clearTimeout(demo.timer); stopSweep(); var em = $('em', bBar); em.style.transition = 'none'; em.style.width = '0%'; }
+		};
+		/* Real visitor interaction pauses the tour; the play button starts it again. */
+		dash.addEventListener('pointerdown', function (e) {
+			if (!e.isTrusted || badge.contains(e.target)) { return; }
+			if (demo.on) { setMode(false); }
+		});
+		dash.addEventListener('pointermove', function (e) { if (e.isTrusted && demo.on && plot && plot.contains(e.target)) { stopSweep(); } });
+		badge.addEventListener('click', function () { setMode(!demo.on); });
+		if (reduce) { setMode(false); }
+		if ('IntersectionObserver' in window) {
+			new IntersectionObserver(function (es) {
+				demo.visible = es[0].isIntersecting;
+				if (demo.visible && demo.on) { if (!demo.timer || demo.i === 0) { setTimeout(play, 1500); } else { play(); } }
+				if (!demo.visible) { clearTimeout(demo.timer); stopSweep(); }
+			}, { threshold: 0.4 }).observe(dash);
+		}
 		var started2 = false;
 		var go = function () { if (!started2) { started2 = true; render(); } };
 		if ('IntersectionObserver' in window) {
