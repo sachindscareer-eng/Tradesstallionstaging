@@ -143,3 +143,36 @@ function tsd_faqs() {
 		array( 'q' => 'Are you a UK marketplace management agency?', 'a' => 'Yes. TradeStallion is based in London and provides marketplace management for UK sellers and brands on Amazon, eBay, Etsy and Shopify.' ),
 	) );
 }
+
+/**
+ * Promo reel for the marketplaces card.
+ * Uses the plugin copy (assets/video) if present, otherwise a Media Library
+ * upload named "tradestallion-promo-reel".
+ *
+ * @return array|null { src, poster }
+ */
+function tsd_promo_video() {
+	$file = 'assets/video/tradestallion-promo-reel.mp4';
+	$out  = null;
+	if ( file_exists( TSD_DIR . $file ) ) {
+		$out = array(
+			'src'    => TSD_URL . $file . '?ver=' . filemtime( TSD_DIR . $file ),
+			'poster' => file_exists( TSD_DIR . 'assets/video/tradestallion-promo-poster.jpg' ) ? TSD_URL . 'assets/video/tradestallion-promo-poster.jpg' : '',
+		);
+	} else {
+		$found = get_posts(
+			array(
+				'post_type'      => 'attachment',
+				'post_status'    => 'inherit',
+				'post_mime_type' => 'video',
+				'name'           => 'tradestallion-promo-reel',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+			)
+		);
+		if ( $found ) {
+			$out = array( 'src' => wp_get_attachment_url( $found[0] ), 'poster' => '' );
+		}
+	}
+	return apply_filters( 'tsd_promo_video', $out );
+}
