@@ -35,6 +35,7 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 			<nav aria-label="Main" class="ts-nav">
 				<a href="#top" class="is-active">Home</a>
 				<a href="#who">Who We Help</a>
+				<a href="#dashboard">How We Work</a>
 				<a href="#services">Services</a>
 				<a href="#faq">FAQ</a>
 			</nav>
@@ -57,34 +58,57 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 		<div class="ts-hero__copy">
 			<div class="ts-badge"><span class="ts-badge__dot"></span>Marketplace Growth Partner</div>
 			<h1 class="ts-h1" data-split>Turn Marketplace Chaos Into <span class="ts-accent">Growth.</span></h1>
-			<p class="ts-hero__lead">UK marketplace management for Amazon, eBay, Etsy, Shopify, TikTok Shop and bol.com sellers. We manage the listings, ads, account health and operations that drain your time — so you can focus on your products while we focus on growth.</p>
+			<p class="ts-hero__lead">UK marketplace management for Amazon, eBay, Etsy and Shopify sellers. We manage the listings, ads, account health and operations that drain your time — so you can focus on your products while we focus on growth.</p>
 			<div class="ts-row">
 				<a href="<?php echo esc_url( $booking ); ?>" class="ts-btn ts-btn--primary ts-btn--glow" data-magnetic>Book My Free Account Audit <?php echo tsd_icon( 'arrow' ); // phpcs:ignore ?></a>
 				<a href="#services" class="ts-btn ts-btn--ghost" data-magnetic>Explore Services</a>
 			</div>
 			<div class="ts-stats">
 				<div class="ts-stat"><div class="ts-stat__num"><span data-count="12">12</span>+</div><div class="ts-stat__label">Years selling experience</div></div>
-				<div class="ts-stat"><div class="ts-stat__num"><span data-count="6">6</span></div><div class="ts-stat__label">Marketplaces, one team</div></div>
+				<div class="ts-stat"><div class="ts-stat__num"><span data-count="4">4</span></div><div class="ts-stat__label">Marketplaces, one team</div></div>
 				<div class="ts-stat"><div class="ts-stat__num ts-accent">Free</div><div class="ts-stat__label">No-obligation audit</div></div>
 			</div>
 		</div>
 
 		<div class="ts-hero__art" data-parallax>
 			<div class="ts-orbit" aria-hidden="true"><div class="ts-orbit__ring">
-				<?php foreach ( tsd_marketplace_names() as $i => $m ) : ?>
-					<span class="ts-orbit__chip" style="--i:<?php echo (int) $i; ?>"><span><?php echo esc_html( $m ); ?></span></span>
+				<?php $tsd_i = 0; foreach ( tsd_marketplace_logos() as $key => $logo ) : ?>
+					<span class="ts-orbit__chip" style="--i:<?php echo (int) $tsd_i++; ?>"><span><?php echo tsd_logo_img( $key ); // phpcs:ignore ?></span></span>
 				<?php endforeach; ?>
 			</div></div>
 			<div class="ts-hero__frame">
-				<?php tsd_picture( 'hero', 'Marketplace specialist managing seller accounts on a laptop', 'width="864" height="1080" fetchpriority="high" decoding="async" class="ts-hero__img"' ); ?>
+				<div class="ts-scene" data-scene data-logos="<?php echo esc_attr( wp_json_encode( array_map( function ( $l ) { return $l['url']; }, tsd_marketplace_logos() ) ) ); ?>" role="img" aria-label="Animated preview of TradeStallion managing marketplace orders, listings, ads and account health">
+					<div class="ts-scene__top">
+						<span class="ts-scene__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+						<span class="ts-scene__title">Seller Command Centre</span>
+						<span class="ts-scene__live"><b></b>Live</span>
+					</div>
+					<div class="ts-scene__kpis">
+						<div class="ts-scene__kpi"><small>Revenue today</small><strong data-scene-rev>£0</strong><em>▲ 18% vs last week</em></div>
+						<div class="ts-scene__kpi"><small>Ad spend (ACoS)</small><strong data-scene-acos>34%</strong><em class="is-good">▼ trending down</em></div>
+					</div>
+					<div class="ts-scene__chart">
+						<div class="ts-scene__chart-head"><span>Sales · last 14 days</span><span class="ts-scene__chip">All marketplaces</span></div>
+						<svg viewBox="0 0 320 120" preserveAspectRatio="none" aria-hidden="true">
+							<defs><linearGradient id="tsSceneFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF6A13" stop-opacity=".45"></stop><stop offset="1" stop-color="#FF6A13" stop-opacity="0"></stop></linearGradient></defs>
+							<g class="ts-scene__grid"><line x1="0" y1="30" x2="320" y2="30"></line><line x1="0" y1="60" x2="320" y2="60"></line><line x1="0" y1="90" x2="320" y2="90"></line></g>
+							<path class="ts-scene__area" d="M0,104 L23,98 L46,100 L69,90 L92,92 L115,80 L138,84 L161,70 L184,66 L207,58 L230,52 L253,40 L276,34 L299,24 L320,18 L320,120 L0,120 Z"></path>
+							<path class="ts-scene__line" pathLength="1" d="M0,104 L23,98 L46,100 L69,90 L92,92 L115,80 L138,84 L161,70 L184,66 L207,58 L230,52 L253,40 L276,34 L299,24 L320,18"></path>
+							<circle class="ts-scene__dot" cx="320" cy="18" r="5"></circle>
+						</svg>
+					</div>
+					<div class="ts-scene__feed" data-scene-feed aria-hidden="true"></div>
+					<div class="ts-scene__health">
+						<svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" class="ts-scene__ring-bg"></circle><circle cx="22" cy="22" r="18" class="ts-scene__ring" pathLength="1"></circle></svg>
+						<div><small>Account health</small><strong>Healthy · 0 issues</strong></div>
+					</div>
+					<div class="ts-scene__note">Illustrative animation</div>
+					<div class="ts-scene__bar" aria-hidden="true"><span></span></div>
+				</div>
 			</div>
 			<div class="ts-float ts-float--bl">
 				<span class="ts-float__icon"><?php echo tsd_icon( 'check', 20, 'currentColor', 2 ); // phpcs:ignore ?></span>
 				<div><div class="ts-float__title">Free account audit</div><div class="ts-float__sub">No cost, no obligation</div></div>
-			</div>
-			<div class="ts-float ts-float--tr">
-				<div class="ts-float__sub">London-based team</div>
-				<div class="ts-float__title">6 marketplaces · 1 point of contact</div>
 			</div>
 		</div>
 	</div>
@@ -100,9 +124,9 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 			<div class="ts-marquee__track">
 				<?php for ( $r = 0; $r < 2; $r++ ) : ?>
 					<div class="ts-marquee__group"<?php echo $r ? ' aria-hidden="true"' : ''; ?>>
-						<?php foreach ( tsd_marketplace_names() as $m ) : ?>
-							<span class="ts-marquee__item"><?php echo esc_html( $m ); ?><i aria-hidden="true">✦</i></span>
-						<?php endforeach; ?>
+						<?php for ( $rep = 0; $rep < 3; $rep++ ) : foreach ( tsd_marketplace_logos() as $key => $logo ) : ?>
+							<span class="ts-marquee__logo"><?php echo tsd_logo_img( $key ); // phpcs:ignore ?></span><i class="ts-marquee__star" aria-hidden="true">✦</i>
+						<?php endforeach; endfor; ?>
 					</div>
 				<?php endfor; ?>
 			</div>
@@ -163,7 +187,7 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 	<div class="ts-wrap">
 		<div class="ts-head" style="max-width:760px">
 			<div class="ts-eyebrow">Marketplaces we manage</div>
-			<h2 class="ts-h2 ts-h2--gap">Marketplace Management Across 6 Leading Marketplaces</h2>
+			<h2 class="ts-h2 ts-h2--gap">Marketplace Management for Amazon, eBay, Etsy &amp; Shopify</h2>
 			<p class="ts-muted">Every marketplace has its own rules, fees and algorithm. We run each channel the way it needs to be run, while keeping your brand, stock and pricing consistent across all of them.</p>
 		</div>
 		<div class="ts-bento">
@@ -171,7 +195,7 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 				<?php tsd_picture( 'marketplaces', 'Happy customer with shopping bags', 'width="576" height="720" loading="lazy" decoding="async"' ); ?>
 				<div aria-hidden="true" class="ts-bento__shade"></div>
 				<div class="ts-bento__cap">
-					<div class="ts-bento__num">6</div>
+					<div class="ts-bento__num">4</div>
 					<div class="ts-bento__title">marketplaces, one team</div>
 					<div class="ts-bento__sub">Brand, stock and pricing kept consistent everywhere you sell.</div>
 				</div>
@@ -180,7 +204,7 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 				<div class="ts-tabs__list" role="tablist" aria-label="Marketplaces we manage">
 					<?php foreach ( tsd_marketplaces() as $i => $m ) : ?>
 						<button class="ts-tabs__tab<?php echo 0 === $i ? ' is-active' : ''; ?>" role="tab" type="button" id="ts-tab-<?php echo (int) $i; ?>" aria-controls="ts-panel-<?php echo (int) $i; ?>" aria-selected="<?php echo 0 === $i ? 'true' : 'false'; ?>" tabindex="<?php echo 0 === $i ? '0' : '-1'; ?>">
-							<span class="ts-mk__letter"><?php echo esc_html( $m['letter'] ); ?></span>
+							<span class="ts-tabs__logo"><?php echo tsd_logo_img( $m['key'] ); // phpcs:ignore ?></span>
 							<span class="ts-tabs__name"><?php echo esc_html( preg_replace( '/ (Account|Shop|Store) Management$/', '', $m['title'] ) ); ?></span>
 						</button>
 					<?php endforeach; ?>
@@ -202,6 +226,96 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 	</div>
 </section>
 
+<!-- ================= LIVE DASHBOARD DEMO ================= -->
+<section id="dashboard" class="ts-section ts-dash-sec">
+	<div aria-hidden="true" class="ts-glow ts-glow--dash"></div>
+	<div class="ts-wrap">
+		<div class="ts-head ts-head--split">
+			<div style="max-width:680px">
+				<div class="ts-eyebrow">Inside our process</div>
+				<h2 class="ts-h2 ts-h2--gap">See How We Run Your Marketplace Accounts</h2>
+				<p class="ts-muted">This is the kind of weekly view every client gets: sales, ad efficiency, account health and the exact actions our team took. Pick a marketplace and a period to explore.</p>
+			</div>
+			<p class="ts-dash-note"><span aria-hidden="true">i</span>Illustrative example with sample data, not a client's results.</p>
+		</div>
+
+		<div class="ts-dash ts-reveal" data-dash data-logos="<?php echo esc_attr( wp_json_encode( array_map( function ( $l ) { return $l['url']; }, tsd_marketplace_logos() ) ) ); ?>">
+			<aside class="ts-dash__side">
+				<div class="ts-dash__brand"><span class="ts-dash__mark">TS</span><div><strong>Client Portal</strong><small>Demo Brand Ltd</small></div></div>
+				<div class="ts-dash__label">Marketplaces</div>
+				<div class="ts-dash__mps" role="tablist" aria-label="Choose a marketplace">
+					<?php $tsd_i = 0; foreach ( tsd_marketplace_logos() as $key => $logo ) : ?>
+						<button type="button" role="tab" class="ts-dash__mp<?php echo 0 === $tsd_i ? ' is-active' : ''; ?>" data-mp="<?php echo esc_attr( $key ); ?>" aria-selected="<?php echo 0 === $tsd_i ? 'true' : 'false'; ?>">
+							<span class="ts-dash__mp-logo"><?php echo tsd_logo_img( $key ); // phpcs:ignore ?></span>
+							<span class="ts-dash__mp-name"><?php echo esc_html( $logo['name'] ); ?></span>
+							<span class="ts-dash__mp-dot" aria-hidden="true"></span>
+						</button>
+					<?php $tsd_i++; endforeach; ?>
+				</div>
+				<div class="ts-dash__label">Workspace</div>
+				<ul class="ts-dash__menu" aria-hidden="true">
+					<li class="is-active">Overview</li><li>Listings</li><li>Advertising</li><li>Account health</li><li>Weekly reports</li>
+				</ul>
+				<div class="ts-dash__manager">
+					<span class="ts-dash__avatar" aria-hidden="true">AM</span>
+					<div><small>Your account manager</small><strong>Online · replies in &lt; 2h</strong></div>
+				</div>
+			</aside>
+
+			<div class="ts-dash__main">
+				<div class="ts-dash__top">
+					<div>
+						<div class="ts-dash__crumb">Overview</div>
+						<h3 class="ts-dash__title" data-dash-title>Amazon UK performance</h3>
+					</div>
+					<div class="ts-dash__range" role="group" aria-label="Choose a period">
+						<button type="button" data-range="7">7D</button>
+						<button type="button" data-range="30" class="is-active">30D</button>
+						<button type="button" data-range="90">90D</button>
+					</div>
+				</div>
+
+				<div class="ts-dash__kpis">
+					<div class="ts-kpi"><small>Revenue</small><strong data-kpi="rev">£0</strong><em data-kpi-d="rev">▲ 0%</em><svg class="ts-kpi__spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><path data-spark="rev"></path></svg></div>
+					<div class="ts-kpi"><small>Orders</small><strong data-kpi="ord">0</strong><em data-kpi-d="ord">▲ 0%</em><svg class="ts-kpi__spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><path data-spark="ord"></path></svg></div>
+					<div class="ts-kpi"><small>Ad spend (ACoS)</small><strong data-kpi="acos">0%</strong><em data-kpi-d="acos" class="is-good">▼ 0 pts</em><svg class="ts-kpi__spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><path data-spark="acos"></path></svg></div>
+					<div class="ts-kpi ts-kpi--health"><small>Account health</small><strong data-kpi="health">Healthy</strong><em class="is-good" data-kpi-d="health">0 open issues</em><div class="ts-kpi__meter"><span data-health-bar></span></div></div>
+				</div>
+
+				<div class="ts-dash__chart">
+					<div class="ts-dash__chart-head">
+						<strong>Revenue trend</strong>
+						<div class="ts-dash__legend"><span class="is-before">Before TradeStallion</span><span class="is-after">With TradeStallion</span></div>
+					</div>
+					<div class="ts-dash__plot" data-plot>
+						<svg viewBox="0 0 600 220" preserveAspectRatio="none" aria-hidden="true">
+							<defs><linearGradient id="tsDashFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF6A13" stop-opacity=".35"></stop><stop offset="1" stop-color="#FF6A13" stop-opacity="0"></stop></linearGradient></defs>
+							<g class="ts-dash__gridlines"><line x1="0" y1="55" x2="600" y2="55"></line><line x1="0" y1="110" x2="600" y2="110"></line><line x1="0" y1="165" x2="600" y2="165"></line></g>
+							<path class="ts-dash__before" data-path="before"></path>
+							<path class="ts-dash__area" data-path="area"></path>
+							<path class="ts-dash__after" data-path="after" pathLength="1"></path>
+							<line class="ts-dash__cursor" data-cursor x1="0" y1="0" x2="0" y2="220"></line>
+							<circle class="ts-dash__cursor-dot" data-cursor-dot r="5" cx="-10" cy="-10"></circle>
+						</svg>
+						<div class="ts-dash__tip" data-tip hidden></div>
+					</div>
+				</div>
+
+				<div class="ts-dash__cols">
+					<div class="ts-dash__card">
+						<div class="ts-dash__card-head"><strong>Actions our team took</strong><span data-actions-count>0 completed</span></div>
+						<ul class="ts-dash__actions" data-actions></ul>
+					</div>
+					<div class="ts-dash__card">
+						<div class="ts-dash__card-head"><strong>Top products</strong><span>Revenue share</span></div>
+						<ul class="ts-dash__products" data-products></ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+
 <!-- ================= SERVICES ================= -->
 <section id="services" class="ts-section">
 	<div class="ts-wrap">
@@ -215,6 +329,7 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 		<div class="ts-grid ts-grid--250 ts-grid--tight">
 			<?php foreach ( tsd_services() as $s ) : ?>
 				<a href="<?php echo esc_url( tsd_page_url( $s['slug'] ) ); ?>" class="ts-service ts-reveal" data-tilt>
+					<span class="ts-service__icon"><?php echo tsd_icon( $s['icon'] ?? 'manage', 24, 'currentColor', 2 ); // phpcs:ignore ?></span>
 					<span class="ts-service__num"><?php echo esc_html( $s['num'] ); ?></span>
 					<span class="ts-service__title"><?php echo esc_html( $s['title'] ); ?></span>
 					<span class="ts-service__desc"><?php echo esc_html( $s['desc'] ); ?></span>
@@ -405,7 +520,7 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 			<div class="ts-footer__brand">
 				<div class="ts-footer__logo">TRADE<br>STALLION</div>
 				<div class="ts-footer__bar"></div>
-				<p class="ts-muted ts-small">Helping Amazon, eBay, Etsy, Shopify, TikTok Shop and bol.com sellers grow with tailored strategies that boost sales and simplify marketplace management.</p>
+				<p class="ts-muted ts-small">Helping Amazon, eBay, Etsy and Shopify sellers grow with tailored strategies that boost sales and simplify marketplace management.</p>
 			</div>
 			<nav aria-label="Footer" class="ts-footer__col ts-footer__col--links">
 				<div class="ts-footer__h">Quick Links</div>
