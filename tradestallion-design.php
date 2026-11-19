@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       TradeStallion Design
  * Description:       Custom dark homepage template for TradeStallion (approved design). Adds the "TradeStallion Home (Custom)" page template. Theme-independent: works on top of Astra without touching its settings.
- * Version:           1.3.0
+ * Version:           1.4.0
  * Requires at least: 6.2
  * Requires PHP:      7.4
  * Author:            TradeStallion
@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'TSD_VERSION', '1.3.0' );
+define( 'TSD_VERSION', '1.4.0' );
 define( 'TSD_DIR', plugin_dir_path( __FILE__ ) );
 define( 'TSD_URL', plugin_dir_url( __FILE__ ) );
 define( 'TSD_TEMPLATE', 'tradestallion-home.php' );
