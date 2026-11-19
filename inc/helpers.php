@@ -36,6 +36,14 @@ function tsd_icon( $name, $size = 18, $stroke = 'currentColor', $width = 2.4 ) {
 		'trend'    => '<path d="M3 7l6 6 4-4 8 8"></path><path d="M21 11v6h-6"></path>',
 		'pound'    => '<path d="M18 7c0-2-1.5-3-3.5-3S11 5.2 11 8v10"></path><path d="M7 12h8"></path><path d="M7 20h11"></path>',
 		'alert'    => '<path d="M12 3 2 20h20L12 3z"></path><path d="M12 10v4"></path><path d="M12 17h.01"></path>',
+		'setup'    => '<rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M3 9h18"></path><path d="M8 14h3"></path>',
+		'manage'   => '<path d="M3 12h4l3-8 4 16 3-8h4"></path>',
+		'ads'      => '<path d="M3 11l15-6v14L3 13z"></path><path d="M7 13v5a2 2 0 0 0 4 0v-4"></path>',
+		'globe'    => '<circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"></path>',
+		'image'    => '<rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-9 9"></path>',
+		'catalogue'=> '<path d="M4 5h16"></path><path d="M4 12h16"></path><path d="M4 19h10"></path>',
+		'launch'   => '<path d="M5 19c2-6 6-10 14-14c-4 8-8 12-14 14z"></path><path d="M9 15l-2-2"></path>',
+		'shield'   => '<path d="M12 3l8 3v6c0 5-3.5 8-8 9c-4.5-1-8-4-8-9V6z"></path><path d="M9 12l2 2 4-4"></path>',
 	);
 	if ( ! isset( $paths[ $name ] ) ) {
 		return '';
