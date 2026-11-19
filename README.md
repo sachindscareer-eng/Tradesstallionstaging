@@ -1,61 +1,67 @@
 # TradeStallion – Staging Design
 
-Custom code for the new dark homepage design of tradestallion.com, built for the **staging site only**.
+Custom code for the new dark homepage design of tradestallion.com, built for the **staging site**.
 
-The code is a small WordPress plugin, **TradeStallion Design** (`tradestallion-design/`). It adds a page template called **"TradeStallion Home (Custom)"**. The template renders the approved design exactly: hand-written HTML/CSS/JS, no Elementor, no page builder.
+This repo **is** the WordPress plugin **TradeStallion Design**: the repo root is the plugin folder (`wp-content/plugins/tradestallion-design/`). It adds a page template called **"TradeStallion Home (Custom)"**. The template renders the approved design exactly: hand-written HTML/CSS/JS, no Elementor.
 
-It is a plugin, not a child theme, on purpose. Activating an Astra child theme would drop all Astra Customizer settings (header, footer, colours) on every other page. With the plugin, only the page that uses the template changes; the rest of the site stays as it is.
+It is a plugin, not a child theme, on purpose. An Astra child theme would drop all Astra Customizer settings (header, footer, colours) on every other page. With the plugin, only the page that uses the template changes.
 
-## What's inside
+## Files
 
 ```
-tradestallion-design/
-├── tradestallion-design.php     # plugin bootstrap: registers template, loads assets only on that page
-├── templates/tradestallion-home.php   # the page layout (all sections)
-├── inc/home-data.php            # ALL text content (edit copy here)
-├── inc/forms.php                # Free-audit + newsletter form handlers (email to admin)
-├── inc/helpers.php              # links, icons, image helper
-└── assets/
-    ├── css/home.css             # design styles (exact canvas values + responsive)
-    ├── js/home.js               # sticky header, mobile menu, scroll reveal, active nav
-    └── img/                     # hero + marketplace images (webp + jpg)
+tradestallion-design.php          plugin bootstrap: registers template, loads assets only on that page
+templates/tradestallion-home.php  page layout (all sections)
+inc/home-data.php                 ALL text content (edit copy here)
+inc/forms.php                     free-audit + newsletter forms (emailed to WP admin)
+inc/helpers.php                   links, icons, image helper
+assets/css/home.css               design styles (exact canvas values + responsive)
+assets/js/home.js                 sticky header, mobile menu, scroll reveal, active nav
+assets/img/                       hero + marketplace images (webp + jpg)
+.github/workflows/deploy.yml      auto-deploy to staging on every push to main
 ```
 
-## Features
-- Same design as the approved canvas: dark #0A0A0B, orange #FF6A13, Montserrat + Inter.
-- A modern feel: sticky blurred header, scroll-reveal animations, card hover lifts, animated glow and floating badges. All motion respects `prefers-reduced-motion`.
-- Fully responsive, with a mobile burger menu.
-- SEO-safe:
-  - Calls `wp_head()` / `wp_footer()`, so Rank Math titles, meta and schema keep working.
-  - Single H1.
-  - FAQPage JSON-LD.
-  - Image width and height set, hero image preloaded (better LCP and CLS).
-- Links use the current site's URLs, so on staging they stay on staging.
-- Theme, Elementor and block CSS are dequeued on this page only, which makes it faster.
-- Forms work with no extra plugin:
-  - Audit requests and newsletter sign-ups are emailed to the WP admin email.
-  - Nonce and honeypot spam protection.
+## Workflow: edit → push → staging updates automatically
 
-## Install on staging
+1. Edit files in the local folder (`Desktop\tradestallion-design`). That folder is a clone of this repo.
+2. Commit and push to `main`, with GitHub Desktop or `git push`.
+3. The **Deploy to staging** action runs:
+   - It checks PHP syntax.
+   - It uploads the changed files over FTP to the staging plugin folder.
+   - Progress shows on the repo's **Actions** tab.
+4. Clear the LiteSpeed cache on staging if a change doesn't show.
 
-**Option A: ZIP upload (easiest)**
-1. Download this repo → zip the `tradestallion-design` folder.
-2. Staging WP Admin → Plugins → Add New → Upload Plugin → choose the zip → Install → **Activate**.
+### One-time auto-deploy setup
 
-**Option B: Hostinger Git deploy**
-1. hPanel → staging website → Advanced → **GIT**.
-2. Repository: `https://github.com/sachindscareer-eng/Tradesstallionstaging`, branch `main`.
-3. Install path: `wp-content/plugins/tradestallion-design-repo`. The plugin folder is inside it, so WordPress will see it as `tradestallion-design-repo/tradestallion-design/tradestallion-design.php`.
+**Step 1: get the FTP details.** In Hostinger hPanel, open the staging site, then Files → **FTP Accounts**. Note:
+- the FTP host (e.g. `ftp.tradestallion.com`)
+- the username
+- the password (reset it there if unknown)
 
-   Alternatively, upload just the `tradestallion-design` folder to `wp-content/plugins/` with File Manager.
-4. WP Admin → Plugins → Activate **TradeStallion Design**.
+**Step 2: find the staging plugin folder.** In File Manager, find where the staging WordPress lives (for example `public_html/staging/`). The plugin path is that folder plus `wp-content/plugins/tradestallion-design/`.
 
-**Apply the template**
-1. Pages → **Home** → Edit (open the page in the WordPress editor, not Elementor).
-2. Page / Template panel → select **TradeStallion Home (Custom)** → Update.
-3. Clear LiteSpeed cache → open the staging homepage.
+**Step 3: add the secrets.** In this repo go to Settings → Secrets and variables → Actions → **New repository secret**, and add four:
 
-To roll back: set the template back to the previous one, or deactivate the plugin. The original Elementor content is never touched.
+| Secret | Example |
+|---|---|
+| `FTP_SERVER` | `ftp.tradestallion.com` |
+| `FTP_USERNAME` | `u123456789` |
+| `FTP_PASSWORD` | *(FTP password)* |
+| `FTP_SERVER_DIR` | `/public_html/staging/wp-content/plugins/tradestallion-design/` |
+
+**Step 4: run it.** Actions → Deploy to staging → **Run workflow**, or just push a change.
+
+**Step 5: activate the plugin (first time only).**
+1. Staging WP Admin → Plugins → activate **TradeStallion Design**.
+2. Pages → Home → Edit (WordPress editor, not Elementor) → Template: **TradeStallion Home (Custom)** → Update.
+
+Until the secrets exist, the deploy job skips itself without failing.
+
+**Alternative: Hostinger's built-in Git.** hPanel → Advanced → GIT:
+- repo `https://github.com/sachindscareer-eng/Tradesstallionstaging`, branch `main`
+- install path `wp-content/plugins/tradestallion-design` (must be empty)
+- turn on **Auto Deployment** and add its webhook URL in GitHub → Settings → Webhooks
+
+Use either this or FTP, not both.
 
 ## Editing
 - **Text:** `inc/home-data.php`.
@@ -69,7 +75,6 @@ To roll back: set the template back to the previous one, or deactivate the plugi
   add_filter( 'tsd_form_recipient', fn() => 'connect@tradestallion.com' );
   ```
 
-## Going live (after approval)
-Test everything on staging first: forms, mobile, Rank Math score, PageSpeed. Then either:
-- push staging to live with Hostinger → Staging → **Publish**, or
-- install the same plugin on live and select the template on the Home page.
+## Rollback / going live
+- **Rollback:** switch the Home page template back, or deactivate the plugin. The Elementor content is never touched.
+- **Going live after approval:** Hostinger → Staging → **Publish**, or install this plugin on live and select the template.
