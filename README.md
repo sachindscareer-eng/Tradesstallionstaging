@@ -63,6 +63,15 @@ Until the secrets exist, the deploy job skips itself without failing.
 
 Use either this or FTP, not both.
 
+## GitHub → staging sync (active)
+
+Staging is connected to this repo. Every push to `main` triggers a webhook to `https://staging.tradestallion.com/wp-json/tsd/v1/sync`, and the plugin pulls the new code from GitHub on its own:
+- it downloads the branch, copies the changed files and clears the LiteSpeed cache;
+- a WP-Cron check every 15 minutes catches anything the webhook missed;
+- status and a **Sync now** button are in staging WP Admin → Tools → **TradeStallion Sync**.
+
+No FTP secrets are needed for this. The FTP workflow above is optional.
+
 ## Editing
 - **Text:** `inc/home-data.php`.
 - **Colours and spacing:** CSS variables at the top of `assets/css/home.css`.
