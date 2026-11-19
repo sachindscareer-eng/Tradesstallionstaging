@@ -383,3 +383,14 @@
 @keyframes ts-soundping { 0% { box-shadow: 0 0 0 0 rgba(255,106,19,.6); } 100% { box-shadow: 0 0 0 12px rgba(255,106,19,0); } }
 .ts-reel__sound.is-on { background: rgba(10,10,11,.45); }
 @media (max-width: 760px) { .ts-bento__photo--video { flex: 1 1 100%; max-width: 420px; margin: 0 auto; } }
+
+/* ---------- v1.5: dashboard auto demo badge ---------- */
+.ts-dash__top { flex-wrap: wrap; gap: 12px; }
+.ts-dash__auto { order: 3; display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; border: 1px solid rgba(74,222,128,.35); background: rgba(74,222,128,.08); color: #4ADE80; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .25s; }
+.ts-dash__auto i { width: 8px; height: 8px; border-radius: 50%; background: #4ADE80; animation: ts-pulse 1.6s infinite; }
+.ts-dash__auto b { display: block; width: 46px; height: 3px; border-radius: 3px; background: rgba(74,222,128,.2); overflow: hidden; }
+.ts-dash__auto b em { display: block; height: 100%; width: 0; background: #4ADE80; }
+.ts-dash__auto.is-paused { border-color: rgba(255,106,19,.4); background: rgba(255,106,19,.08); color: #FF8A45; }
+.ts-dash__auto.is-paused i { background: #FF6A13; animation: none; }
+.ts-dash__auto.is-paused b { display: none; }
+.ts-dash__auto:hover { transform: translateY(-1px); }
