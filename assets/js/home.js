@@ -48,14 +48,46 @@
 	var stepsBox = $('[data-steps]');
 	var stepEls = stepsBox ? $$('.ts-step', stepsBox) : [];
 	var fill = stepsBox ? $('.ts-steps__fill', stepsBox) : null;
-	var updateSteps = function () {
-		if (!stepsBox) { return; }
-		var r = stepsBox.getBoundingClientRect();
-		var vh = window.innerHeight;
-		var p = reduce ? 1 : Math.min(1, Math.max(0, (vh * 0.8 - r.top) / (r.height + vh * 0.35)));
-		if (fill) { fill.style.setProperty('--sp', p.toFixed(3)); }
-		stepEls.forEach(function (s, i) { s.classList.toggle('is-lit', p >= (i / Math.max(1, stepEls.length - 1)) * 0.95); });
-	};
+	var updateSteps = function () {};
+	if (stepsBox && fill) {
+		var setSteps = function (p, cur) {
+			fill.style.setProperty('--sp', p.toFixed(4));
+			stepEls.forEach(function (st, i) {
+				var at = i / Math.max(1, stepEls.length - 1);
+				st.classList.toggle('is-lit', p >= at - 0.001);
+				st.classList.toggle('is-current', i === cur);
+			});
+		};
+		if (reduce) { setSteps(1, -1); } else {
+			setSteps(0, 0);
+			var CYCLE = 11000, FILL = 8000, stepsOn = false, t0s = 0, stepsRaf = 0;
+			var ease = function (x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+			var loop = function (t) {
+				if (!stepsOn) { return; }
+				if (!t0s) { t0s = t; }
+				var e = (t - t0s) % CYCLE;
+				var n = stepEls.length - 1;
+				var p, cur;
+				if (e < FILL) {
+					var seg = FILL / n, k = Math.floor(e / seg), local = (e - k * seg) / seg;
+					/* pause on each dot, then glide to the next one */
+					var move = Math.max(0, (local - 0.35) / 0.65);
+					p = (k + ease(move)) / n;
+					cur = move > 0.9 ? k + 1 : k;
+				} else { p = 1; cur = n; }
+				if (e > CYCLE - 500) { fill.style.opacity = String((CYCLE - e) / 500); } else { fill.style.opacity = '1'; }
+				setSteps(Math.min(1, p), cur);
+				stepsRaf = raf(loop);
+			};
+			if ('IntersectionObserver' in window) {
+				new IntersectionObserver(function (es) {
+					var vis = es[0].isIntersecting;
+					if (vis && !stepsOn) { stepsOn = true; t0s = 0; stepsRaf = raf(loop); }
+					if (!vis) { stepsOn = false; }
+				}, { threshold: 0.35 }).observe(stepsBox);
+			} else { stepsOn = true; stepsRaf = raf(loop); }
+		}
+	}
 
 	/* ---------- Header, progress bar, back-to-top ---------- */
 	var header = document.getElementById('ts-header');
@@ -530,12 +562,208 @@
 			});
 			plot.addEventListener('pointerleave', function () { plot.classList.remove('is-hover'); tip.hidden = true; });
 		}
+
+		/* ----- Workspace views (listings, ads, health, reports) ----- */
+		var curView = 'overview';
+		var crumb = $('[data-dash-crumb]', dash);
+		var mk = function (tag, cls, txt) { var e = document.createElement(tag); if (cls) { e.className = cls; } if (txt !== undefined && txt !== null) { e.textContent = txt; } return e; };
+		var stagger = function (list) { list.forEach(function (n, i) { setTimeout(function () { n.classList.add('is-in'); }, 60 + i * 90); }); };
+		var statRow = function (items) {
+			var row = mk('div', 'ts-vstats');
+			items.forEach(function (it) {
+				var c = mk('div', 'ts-vstat'); c.appendChild(mk('small', '', it[0]));
+				var st = mk('strong', '', it[2](0)); c.appendChild(st);
+				if (it[3]) { c.appendChild(mk('em', it[4] || '', it[3])); }
+				row.appendChild(c);
+				setTimeout(function () { animNum(st, it[1], it[2]); }, 50);
+			});
+			return row;
+		};
+		var pct1 = function (v) { return v.toFixed(1) + '%'; };
+		var VIEWS = {
+			listings: function (panel, m, rnd, f) {
+				var total = Math.round(40 + rnd() * 120), opt = Math.round(total * (0.62 + rnd() * 0.25));
+				panel.appendChild(statRow([['Listings live', total, int], ['Optimised by us', opt, int, Math.round(opt / total * 100) + '% of catalogue', 'is-good'], ['Avg listing score', 70 + Math.round(rnd() * 22), function (v) { return Math.round(v) + '/100'; }, '▲ from ' + (42 + Math.round(rnd() * 12)), 'is-good']]));
+				var card = mk('div', 'ts-dash__card ts-vcard');
+				var head = mk('div', 'ts-dash__card-head'); head.appendChild(mk('strong', '', 'Listing quality')); 
+				var chips = mk('div', 'ts-vchips'); ['All', 'Optimised', 'In progress'].forEach(function (c, i) { var b = mk('button', i ? '' : 'is-active', c); b.type = 'button'; b.setAttribute('data-filter', c); chips.appendChild(b); });
+				head.appendChild(chips); card.appendChild(head);
+				var ul = mk('ul', 'ts-vlist');
+				m.products.concat([['Bundle pack', 0], ['Gift edition', 0]]).forEach(function (p, i) {
+					var before = 38 + Math.round(rnd() * 20), after = i < 4 ? 84 + Math.round(rnd() * 14) : before + 18 + Math.round(rnd() * 10);
+					var done = i < 4;
+					var li = mk('li', 'ts-vrow'); li.setAttribute('data-state', done ? 'Optimised' : 'In progress');
+					var top = mk('button', 'ts-vrow__top'); top.type = 'button';
+					top.appendChild(mk('span', 'ts-vrow__name', p[0]));
+					var bar = mk('span', 'ts-vbar'); var fill = mk('i'); bar.appendChild(fill); top.appendChild(bar);
+					top.appendChild(mk('span', 'ts-vrow__score', before + ' → ' + after));
+					top.appendChild(mk('span', 'ts-vchip ' + (done ? 'is-ok' : 'is-wip'), done ? 'Optimised' : 'In progress'));
+					li.appendChild(top);
+					var det = mk('div', 'ts-vrow__det');
+					var b1 = mk('div'); b1.appendChild(mk('small', '', 'Before')); b1.appendChild(mk('p', '', p[0] + ' – new'));
+					var b2 = mk('div', 'is-after'); b2.appendChild(mk('small', '', 'After')); b2.appendChild(mk('p', '', p[0] + ' | Premium Quality, UK Stock, Fast Dispatch – Ideal Gift'));
+					det.appendChild(b1); det.appendChild(b2); li.appendChild(det);
+					top.addEventListener('click', function () { li.classList.toggle('is-open'); });
+					ul.appendChild(li);
+					setTimeout(function () { fill.style.width = after + '%'; }, 200 + i * 90);
+				});
+				card.appendChild(ul); card.appendChild(mk('p', 'ts-vhint', 'Tip: click a product to see a sample title rewrite.'));
+				panel.appendChild(card);
+				chips.addEventListener('click', function (e) {
+					var b = e.target.closest('button'); if (!b) { return; }
+					$$('button', chips).forEach(function (x) { x.classList.toggle('is-active', x === b); });
+					var fv = b.getAttribute('data-filter');
+					$$('.ts-vrow', ul).forEach(function (r) { r.hidden = !(fv === 'All' || r.getAttribute('data-state') === fv); });
+				});
+				stagger($$('.ts-vrow', ul));
+			},
+			ads: function (panel, m, rnd, f) {
+				var camps = [['Sponsored Products – Auto', 0.34], ['Sponsored Products – Exact', 0.28], ['Brand defence', 0.14], ['Competitor targeting', 0.12], ['Retargeting', 0.12]];
+				var spendTotal = m.rev * f * (m.acos[1] / 100) * 0.55;
+				var stats = statRow([['Ad spend', spendTotal, gbp], ['Ad sales', spendTotal / (m.acos[1] / 100), gbp], ['ACoS', m.acos[1], pct1, '▼ was ' + m.acos[0] + '%', 'is-good']]);
+				panel.appendChild(stats);
+				var card = mk('div', 'ts-dash__card ts-vcard');
+				var h = mk('div', 'ts-dash__card-head'); h.appendChild(mk('strong', '', 'Weekly spend vs ad sales')); var lg = mk('div', 'ts-vlegend'); lg.appendChild(mk('span', 'is-a', 'Spend')); lg.appendChild(mk('span', 'is-b', 'Ad sales')); h.appendChild(lg); card.appendChild(h);
+				var chart = mk('div', 'ts-vbars'); var tip = mk('div', 'ts-vbars__tip'); tip.hidden = true;
+				var weeks = curRange === 7 ? 7 : (curRange === 30 ? 8 : 12);
+				for (var w = 0; w < weeks; w++) {
+					var sp = 0.5 + rnd() * 0.3 - w * 0.012, sa = sp * (2.4 + w * 0.22 + rnd() * 0.5);
+					var g = mk('div', 'ts-vbars__g');
+					var a = mk('i', 'is-a'), bb = mk('i', 'is-b');
+					g.appendChild(a); g.appendChild(bb); g.appendChild(mk('span', '', (curRange === 7 ? 'D' : 'W') + (w + 1)));
+					(function (g2, a2, b2, spv, sav, wi) {
+						setTimeout(function () { a2.style.height = (spv / 3) * 100 + '%'; b2.style.height = Math.min(100, (sav / 3) * 100) + '%'; }, 120 + wi * 60);
+						g2.addEventListener('pointerenter', function () { tip.hidden = false; tip.textContent = ''; tip.appendChild(mk('b', '', (curRange === 7 ? 'Day ' : 'Week ') + (wi + 1))); tip.appendChild(mk('span', '', 'ROAS ' + (sav / spv).toFixed(1) + 'x')); tip.style.left = ((wi + 0.5) / weeks * 100) + '%'; });
+					}(g, a, bb, sp, sa, w));
+					chart.appendChild(g);
+				}
+				chart.addEventListener('pointerleave', function () { tip.hidden = true; });
+				chart.appendChild(tip); card.appendChild(chart); panel.appendChild(card);
+				var c2 = mk('div', 'ts-dash__card ts-vcard');
+				var h2 = mk('div', 'ts-dash__card-head'); h2.appendChild(mk('strong', '', 'Campaigns')); var live = mk('span', '', ''); h2.appendChild(live); c2.appendChild(h2);
+				var ul = mk('ul', 'ts-vcamps');
+				var upd = function () { var on = $$('.ts-vswitch.is-on', ul).length; live.textContent = on + ' of ' + camps.length + ' live · try the switches'; };
+				camps.forEach(function (c, i) {
+					var li = mk('li', 'ts-vcamp');
+					var sw = mk('button', 'ts-vswitch' + (i < 4 ? ' is-on' : '')); sw.type = 'button'; sw.setAttribute('aria-label', 'Toggle ' + c[0]); sw.setAttribute('aria-pressed', i < 4 ? 'true' : 'false'); sw.appendChild(mk('i'));
+					li.appendChild(sw);
+					var t = mk('div', 'ts-vcamp__t'); t.appendChild(mk('b', '', c[0])); t.appendChild(mk('small', '', gbp(spendTotal * c[1]) + ' spend · ACoS ' + (m.acos[1] + Math.round((rnd() - 0.5) * 8)) + '%')); li.appendChild(t);
+					var share = mk('span', 'ts-vbar ts-vbar--sm'); var fi = mk('i'); share.appendChild(fi); li.appendChild(share);
+					setTimeout(function () { fi.style.width = (c[1] / 0.34 * 100) + '%'; }, 200 + i * 80);
+					sw.addEventListener('click', function () { var on = sw.classList.toggle('is-on'); sw.setAttribute('aria-pressed', on ? 'true' : 'false'); li.classList.toggle('is-off', !on); upd(); });
+					if (i >= 4) { li.classList.add('is-off'); }
+					ul.appendChild(li);
+				});
+				upd(); c2.appendChild(ul); panel.appendChild(c2);
+				stagger($$('.ts-vcamp', ul));
+			},
+			health: function (panel, m, rnd) {
+				var wrap = mk('div', 'ts-vhealth');
+				var g = mk('div', 'ts-vgauge');
+				g.innerHTML = '<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" class="ts-vgauge__bg"></circle><circle cx="60" cy="60" r="50" class="ts-vgauge__fg" pathLength="100"></circle></svg>';
+				var score = m.health - Math.round(rnd() * 2);
+				var num = mk('strong', '', '0'); var lab = mk('div', 'ts-vgauge__lab'); lab.appendChild(num); lab.appendChild(mk('small', '', 'Health score'));
+				g.appendChild(lab); wrap.appendChild(g);
+				setTimeout(function () { $('.ts-vgauge__fg', g).style.strokeDashoffset = String(100 - score); animNum(num, score, function (v) { return String(Math.round(v)); }); }, 120);
+				var mets = mk('ul', 'ts-vmetrics');
+				[['Order defect rate', 0.1 + rnd() * 0.4, 1, '<'], ['Late dispatch rate', 0.4 + rnd() * 1.2, 4, '<'], ['Pre-fulfilment cancellations', 0.1 + rnd() * 0.6, 2.5, '<'], ['Valid tracking rate', 97 + rnd() * 2.8, 95, '>']].forEach(function (x, i) {
+					var li = mk('li', 'ts-vmetric');
+					var t = mk('div', 'ts-vmetric__t'); t.appendChild(mk('span', '', x[0])); t.appendChild(mk('b', '', x[1].toFixed(1) + '%')); li.appendChild(t);
+					var bar = mk('span', 'ts-vbar ts-vbar--ok'); var fi = mk('i'); bar.appendChild(fi); li.appendChild(bar);
+					li.appendChild(mk('small', '', 'Target ' + x[3] + ' ' + x[2] + '% · ✓ within target'));
+					var w = x[3] === '<' ? Math.max(6, 100 - (x[1] / x[2]) * 100) : x[1];
+					setTimeout(function () { fi.style.width = w + '%'; }, 250 + i * 120);
+					mets.appendChild(li);
+				});
+				wrap.appendChild(mets); panel.appendChild(wrap);
+				var card = mk('div', 'ts-dash__card ts-vcard');
+				var h = mk('div', 'ts-dash__card-head'); h.appendChild(mk('strong', '', 'Issues we handled')); h.appendChild(mk('span', '', 'All resolved')); card.appendChild(h);
+				var tl = mk('ul', 'ts-vtimeline');
+				[['Listing policy warning', 'Reviewed, fixed and appealed within 48h'], ['Suppressed listing', 'Missing attributes added, listing back live'], ['Stranded inventory', 'Listings relinked to stock'], ['Negative feedback', 'Customer contacted and resolved']].forEach(function (x) { var li = mk('li'); li.appendChild(mk('b', '', x[0])); li.appendChild(mk('small', '', x[1])); tl.appendChild(li); });
+				card.appendChild(tl); panel.appendChild(card);
+				stagger($$('li', tl).concat($$('.ts-vmetric', mets)));
+			},
+			reports: function (panel, m, rnd, f) {
+				var intro = mk('p', 'ts-vhint', 'Every week you get a short report like this. Click a week to open it.');
+				panel.appendChild(intro);
+				var list = mk('div', 'ts-vreports');
+				for (var w = 0; w < 4; w++) {
+					var rev = m.rev / 4.3 * (1 + m.lift * (1 - w * 0.18)) * (0.92 + rnd() * 0.16), ch = Math.round((m.lift * 100) / 3 * (1 - w * 0.2) + rnd() * 4);
+					var item = mk('div', 'ts-vreport' + (w === 0 ? ' is-open' : ''));
+					var top = mk('button', 'ts-vreport__top'); top.type = 'button';
+					var ttl = mk('div'); ttl.appendChild(mk('b', '', w === 0 ? 'This week' : w + (w === 1 ? ' week ago' : ' weeks ago'))); ttl.appendChild(mk('small', '', m.name + ' · weekly summary')); top.appendChild(ttl);
+					top.appendChild(mk('span', 'ts-vreport__rev', gbp(rev)));
+					top.appendChild(mk('span', 'ts-vchip is-ok', '▲ ' + ch + '%'));
+					top.appendChild(mk('span', 'ts-vreport__chev', '⌄'));
+					item.appendChild(top);
+					var body = mk('div', 'ts-vreport__body');
+					var ul = mk('ul');
+					m.actions.slice(w % 2, (w % 2) + 3).forEach(function (a) { ul.appendChild(mk('li', '', a[0])); });
+					body.appendChild(mk('small', '', 'What we did'));
+					body.appendChild(ul);
+					var nx = mk('p', 'ts-vreport__next'); nx.appendChild(mk('b', '', 'Next week: ')); nx.appendChild(document.createTextNode(['Scale best-performing keywords', 'Refresh main images on two products', 'Test a new coupon on slow sellers', 'Expand into a new category'][w])); body.appendChild(nx);
+					item.appendChild(body);
+					(function (it) { top.addEventListener('click', function () { it.classList.toggle('is-open'); }); }(item));
+					list.appendChild(item);
+				}
+				panel.appendChild(list);
+				stagger($$('.ts-vreport', list));
+			}
+		};
+		var renderView = function () {
+			var panel = $('[data-view-panel="' + curView + '"]', dash);
+			if (!panel || curView === 'overview') { return; }
+			panel.innerHTML = '';
+			VIEWS[curView](panel, MP[curMp], seed(curMp + curView + curRange), RANGE[curRange]);
+		};
+		var renderOverview = render;
+		render = function () { renderOverview(); renderView(); };
+		var VIEW_NAMES = { overview: 'Overview', listings: 'Listings', ads: 'Advertising', health: 'Account health', reports: 'Weekly reports' };
+		$$('[data-view]', dash).forEach(function (b) {
+			b.addEventListener('click', function () {
+				curView = b.getAttribute('data-view');
+				$$('[data-view]', dash).forEach(function (x) { var on = x === b; x.classList.toggle('is-active', on); x.setAttribute('aria-selected', on ? 'true' : 'false'); });
+				$$('[data-view-panel]', dash).forEach(function (pn) { var on = pn.getAttribute('data-view-panel') === curView; pn.hidden = !on; pn.classList.toggle('is-active', on); });
+				if (crumb) { crumb.textContent = VIEW_NAMES[curView]; }
+				if (curView === 'overview') { renderOverview(); } else { renderView(); }
+			});
+		});
 		var started2 = false;
 		var go = function () { if (!started2) { started2 = true; render(); } };
 		if ('IntersectionObserver' in window) {
 			new IntersectionObserver(function (es, ob) { if (es[0].isIntersecting) { go(); ob.disconnect(); } }, { threshold: 0.25 }).observe(dash);
 		} else { go(); }
 	}
+	}());
+
+
+	/* ---------- Promo reel: autoplay (muted by browser rules), sound on tap ---------- */
+	(function () {
+		var box = $('[data-reel]');
+		if (!box) { return; }
+		var v = $('video', box), btn = $('[data-reel-sound]', box), lab = $('[data-reel-label]', box);
+		var userMuted = false, visible = false;
+		var setSound = function (on) {
+			v.muted = !on;
+			if (on) { v.volume = 1; var pr = v.play(); if (pr && pr.catch) { pr.catch(function () {}); } }
+			btn.classList.toggle('is-on', on);
+			btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+			lab.textContent = on ? 'Sound on' : 'Tap for sound';
+		};
+		btn.addEventListener('click', function (e) { e.stopPropagation(); var on = v.muted; userMuted = !on; setSound(on); });
+		box.addEventListener('click', function (e) { if (e.target === v) { var on2 = v.muted; userMuted = !on2; setSound(on2); } });
+		/* Browsers only allow sound after the visitor interacts with the page. */
+		var firstTouch = function () {
+			if (!userMuted && visible && v.muted) { setSound(true); }
+			['pointerdown', 'keydown'].forEach(function (t) { document.removeEventListener(t, firstTouch, true); });
+		};
+		['pointerdown', 'keydown'].forEach(function (t) { document.addEventListener(t, firstTouch, true); });
+		if ('IntersectionObserver' in window) {
+			new IntersectionObserver(function (es) {
+				visible = es[0].isIntersecting;
+				if (visible) { var pr = v.play(); if (pr && pr.catch) { pr.catch(function () {}); } } else { v.pause(); }
+			}, { threshold: 0.35 }).observe(box);
+		}
 	}());
 
 	window.addEventListener('scroll', onScroll, { passive: true });
