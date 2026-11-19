@@ -191,8 +191,14 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 			<p class="ts-muted">Every marketplace has its own rules, fees and algorithm. We run each channel the way it needs to be run, while keeping your brand, stock and pricing consistent across all of them.</p>
 		</div>
 		<div class="ts-bento">
-			<div class="ts-bento__photo ts-reveal">
-				<?php tsd_picture( 'marketplaces', 'Happy customer with shopping bags', 'width="576" height="720" loading="lazy" decoding="async"' ); ?>
+			<?php $tsd_reel = tsd_promo_video(); ?>
+			<div class="ts-bento__photo ts-reveal<?php echo $tsd_reel ? ' ts-bento__photo--video' : ''; ?>"<?php echo $tsd_reel ? ' data-reel' : ''; ?>>
+				<?php if ( $tsd_reel ) : ?>
+					<video class="ts-reel" src="<?php echo esc_url( $tsd_reel['src'] ); ?>"<?php echo $tsd_reel['poster'] ? ' poster="' . esc_url( $tsd_reel['poster'] ) . '"' : ''; ?> autoplay muted loop playsinline preload="metadata" aria-label="TradeStallion promo video"></video>
+					<button type="button" class="ts-reel__sound" data-reel-sound aria-pressed="false"><span class="ts-reel__ic" aria-hidden="true"></span><span data-reel-label>Tap for sound</span></button>
+				<?php else : ?>
+					<?php tsd_picture( 'marketplaces', 'Happy customer with shopping bags', 'width="576" height="720" loading="lazy" decoding="async"' ); ?>
+				<?php endif; ?>
 				<div aria-hidden="true" class="ts-bento__shade"></div>
 				<div class="ts-bento__cap">
 					<div class="ts-bento__num">4</div>
@@ -253,9 +259,14 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 					<?php $tsd_i++; endforeach; ?>
 				</div>
 				<div class="ts-dash__label">Workspace</div>
-				<ul class="ts-dash__menu" aria-hidden="true">
-					<li class="is-active">Overview</li><li>Listings</li><li>Advertising</li><li>Account health</li><li>Weekly reports</li>
-				</ul>
+				<div class="ts-dash__menu" role="tablist" aria-label="Dashboard views">
+					<?php
+					$tsd_views = array( 'overview' => array( 'Overview', 'manage' ), 'listings' => array( 'Listings', 'catalogue' ), 'ads' => array( 'Advertising', 'ads' ), 'health' => array( 'Account health', 'shield' ), 'reports' => array( 'Weekly reports', 'trend' ) );
+					foreach ( $tsd_views as $vk => $vv ) :
+						?>
+						<button type="button" role="tab" class="ts-dash__view-btn<?php echo 'overview' === $vk ? ' is-active' : ''; ?>" data-view="<?php echo esc_attr( $vk ); ?>" aria-selected="<?php echo 'overview' === $vk ? 'true' : 'false'; ?>"><span class="ts-dash__view-ic"><?php echo tsd_icon( $vv[1], 16, 'currentColor', 2 ); // phpcs:ignore ?></span><?php echo esc_html( $vv[0] ); ?></button>
+					<?php endforeach; ?>
+				</div>
 				<div class="ts-dash__manager">
 					<span class="ts-dash__avatar" aria-hidden="true">AM</span>
 					<div><small>Your account manager</small><strong>Online · replies in &lt; 2h</strong></div>
@@ -265,7 +276,7 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 			<div class="ts-dash__main">
 				<div class="ts-dash__top">
 					<div>
-						<div class="ts-dash__crumb">Overview</div>
+						<div class="ts-dash__crumb" data-dash-crumb>Overview</div>
 						<h3 class="ts-dash__title" data-dash-title>Amazon UK performance</h3>
 					</div>
 					<div class="ts-dash__range" role="group" aria-label="Choose a period">
@@ -275,6 +286,7 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 					</div>
 				</div>
 
+				<div class="ts-dash__view is-active" data-view-panel="overview">
 				<div class="ts-dash__kpis">
 					<div class="ts-kpi"><small>Revenue</small><strong data-kpi="rev">£0</strong><em data-kpi-d="rev">▲ 0%</em><svg class="ts-kpi__spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><path data-spark="rev"></path></svg></div>
 					<div class="ts-kpi"><small>Orders</small><strong data-kpi="ord">0</strong><em data-kpi-d="ord">▲ 0%</em><svg class="ts-kpi__spark" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><path data-spark="ord"></path></svg></div>
@@ -311,6 +323,11 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 						<ul class="ts-dash__products" data-products></ul>
 					</div>
 				</div>
+				</div>
+				<div class="ts-dash__view" data-view-panel="listings" hidden></div>
+				<div class="ts-dash__view" data-view-panel="ads" hidden></div>
+				<div class="ts-dash__view" data-view-panel="health" hidden></div>
+				<div class="ts-dash__view" data-view-panel="reports" hidden></div>
 			</div>
 		</div>
 	</div>
@@ -398,6 +415,15 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 						<div class="ts-benefit"><?php echo tsd_icon( 'check', 22, '#FF6A13' ); // phpcs:ignore ?><span><?php echo esc_html( $b ); ?></span></div>
 					<?php endforeach; ?>
 				</div>
+				<div class="ts-audit__trust">
+					<span class="ts-audit__trust-label">We audit</span>
+					<span class="ts-audit__logos"><?php foreach ( array_keys( tsd_marketplace_logos() ) as $lk ) { echo '<span>' . tsd_logo_img( $lk ) . '</span>'; } // phpcs:ignore ?></span>
+				</div>
+				<ul class="ts-audit__meta">
+					<li><b>4</b><span>Marketplaces covered</span></li>
+					<li><b>UK</b><span>London team</span></li>
+					<li><b>£0</b><span>No obligation</span></li>
+				</ul>
 			</div>
 
 			<?php
@@ -409,7 +435,8 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 				<form class="ts-form" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 					<input type="hidden" name="action" value="tsd_audit">
 					<?php wp_nonce_field( 'tsd_audit', 'tsd_nonce' ); ?>
-					<div>
+					<div class="ts-form__head">
+						<span class="ts-form__badge"><i></i>Free · takes 1 minute</span>
 						<div class="ts-form__title">Tell us about your store</div>
 						<div class="ts-form__sub">Submit your details and our team will review your request.</div>
 					</div>
@@ -444,8 +471,9 @@ $news_state  = isset( $_GET['tsd_news'] ) ? sanitize_key( wp_unslash( $_GET['tsd
 		</div>
 		<div class="ts-why">
 			<?php foreach ( tsd_why() as $i => $w ) : ?>
+				<?php $tsd_why_ic = array( 'globe', 'trend', 'manage', 'pound', 'catalogue', 'shield' ); ?>
 				<div class="ts-why__item ts-reveal" data-spot>
-					<div class="ts-why__n"><?php echo esc_html( sprintf( '%02d', $i + 1 ) ); ?></div>
+					<div class="ts-why__top"><span class="ts-why__icon"><?php echo tsd_icon( $tsd_why_ic[ $i % 6 ], 24, 'currentColor', 2 ); // phpcs:ignore ?></span><div class="ts-why__n"><?php echo esc_html( sprintf( '%02d', $i + 1 ) ); ?></div></div>
 					<h3 class="ts-h3 ts-h3--md"><?php echo esc_html( $w['title'] ); ?></h3>
 					<p class="ts-muted ts-body15"><?php echo esc_html( $w['desc'] ); ?></p>
 				</div>
