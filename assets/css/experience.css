@@ -384,13 +384,17 @@
 .ts-reel__sound.is-on { background: rgba(10,10,11,.45); }
 @media (max-width: 760px) { .ts-bento__photo--video { flex: 1 1 100%; max-width: 420px; margin: 0 auto; } }
 
-/* ---------- v1.5: dashboard auto demo badge ---------- */
+/* ---------- v1.5: dashboard auto demo play/pause ---------- */
 .ts-dash__top { flex-wrap: wrap; gap: 12px; }
-.ts-dash__auto { order: 3; display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; border: 1px solid rgba(74,222,128,.35); background: rgba(74,222,128,.08); color: #4ADE80; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .25s; }
-.ts-dash__auto i { width: 8px; height: 8px; border-radius: 50%; background: #4ADE80; animation: ts-pulse 1.6s infinite; }
-.ts-dash__auto b { display: block; width: 46px; height: 3px; border-radius: 3px; background: rgba(74,222,128,.2); overflow: hidden; }
-.ts-dash__auto b em { display: block; height: 100%; width: 0; background: #4ADE80; }
-.ts-dash__auto.is-paused { border-color: rgba(255,106,19,.4); background: rgba(255,106,19,.08); color: #FF8A45; }
-.ts-dash__auto.is-paused i { background: #FF6A13; animation: none; }
+.ts-dash__auto { order: 3; display: inline-flex; align-items: center; gap: 9px; padding: 5px 14px 5px 5px; border-radius: 999px; border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.05); color: #FFFFFF; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: all .25s; }
+.ts-dash__auto:hover { border-color: #FF6A13; transform: translateY(-1px); }
+.ts-dash__auto-ic { position: relative; flex: none; width: 28px; height: 28px; border-radius: 50%; background: #FF6A13; box-shadow: 0 0 18px rgba(255,106,19,.45); }
+.ts-dash__auto-ic::before, .ts-dash__auto-ic::after { content: ""; position: absolute; top: 9px; width: 3px; height: 10px; border-radius: 1px; background: #0A0A0B; }
+.ts-dash__auto-ic::before { left: 10px; }
+.ts-dash__auto-ic::after { left: 15px; }
+.ts-dash__auto.is-paused .ts-dash__auto-ic::before { left: 11px; top: 8px; width: 0; height: 0; border-radius: 0; background: none; border-style: solid; border-width: 6px 0 6px 9px; border-color: transparent transparent transparent #0A0A0B; }
+.ts-dash__auto.is-paused .ts-dash__auto-ic::after { display: none; }
+.ts-dash__auto.is-paused .ts-dash__auto-ic { animation: ts-soundping 1.8s ease-out infinite; }
+.ts-dash__auto b { display: block; width: 46px; height: 3px; border-radius: 3px; background: rgba(255,255,255,.12); overflow: hidden; }
+.ts-dash__auto b em { display: block; height: 100%; width: 0; background: #FF6A13; }
 .ts-dash__auto.is-paused b { display: none; }
-.ts-dash__auto:hover { transform: translateY(-1px); }
